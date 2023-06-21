@@ -1,29 +1,22 @@
 const Account = require('./accounts-model');
 
 exports.checkAccountPayload = (req, res, next) => {
-  // DO YOUR MAGIC
-  // Note: you can either write "manual" validation logic
-  // or use the Yup library (not currently installed)
-
-  const name = req.body.name.trim();
-  const budget = req.body.budget;
-
-  if (!name || !budget) {
-    res.status(400).json({ message: "name and budget are required" });
-  } else if(name && budget) {
-    if (name.length < 3 || name.length > 100) {
-      res.status(400).json({ message: "name of account must be between 3 and 100" });
-    } else if (typeof budget !== "number") {
-      res.status(400).json({ message: "budget of account must be a number" });
-    } else if (budget < 0 || budget > 1000000) {
-      res.status(400).json({ message: "budget of account is too large or too small" });
-    } else {
-      req.body.name = name;
-      req.body.budget = budget;
-      next();
-    }
+  const { name, budget } = req.body;
+  if (name === undefined || budget === undefined) {
+    return res.status(400).json({ message: 'Name and budget are required' });
   }
-}
+  if (typeof name !== 'string' || name.trim().length < 3 || name.trim().length > 100) {
+    return res.status(400).json({ message: 'Name must be between 3 and 100 characters' });
+  }
+  if (typeof budget !== 'number' || isNaN(budget)) {
+    return res.status(400).json({ message: 'Budget must be a number' });
+  }
+  if (budget < 0 || budget > 1000000) {
+    return res.status(400).json({ message: 'budget is too large or too small' });
+  }
+  req.body.name = name.trim();
+  next();
+};
 
 exports.checkAccountNameUnique = (req, res, next) => {
   // DO YOUR MAGIC
@@ -50,5 +43,5 @@ exports.checkAccountId = (req, res, next) => {
       } else {
         res.status(404).json({ message: "account not found" });
       }
-    });
-}
+    })
+  }
